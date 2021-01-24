@@ -77,7 +77,7 @@ def detect_mask(image):
     
 def detect_mask_image(image):  
     label='_'
-    image = cv2.imdecode(np.fromstring(image.read(), np.uint8), 1)  #read the image from temporary memory
+    #image = cv2.imdecode(np.fromstring(image.read(), np.uint8), 1)  #read the image from temporary memory
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # convert image from BGR to RGB
     orig = image.copy() # get a copy of the image
     (h, w) = image.shape[:2] # get image height and weight
@@ -88,7 +88,7 @@ def detect_mask_image(image):
 
     for i in range(0, detection.shape[2]): # loop through the detection
 
-        confidence = detection[0, 0, i, 2] # extract confidence vaalue
+        confidence = detection[0, 0, i, 2] # extract confidence value
 
         if confidence > 0.50: # if the confidence is greater than the selected confidence from the side bar
 
@@ -114,7 +114,7 @@ def detect_mask_image(image):
             label = "{}: {:.2f}%".format(label, max(mask, withoutMask) * 100) # add label probability 
 
             cv2.putText(image, label, (startX, startY - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1.20, color, 2)
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.80, color, 2)
             cv2.rectangle(image, (startX, startY), (endX, endY), color, 2) #display label and bbox rectangle in output frame
 
         return image, label # return image and label
