@@ -11,7 +11,7 @@ st.set_option('deprecation.showfileUploaderEncoding', False)
 
 
 @st.cache(hash_funcs={cv2.dnn_Net: hash})
-# Load face detector
+# load face detector
 def load_face_detector_model():
     prototxt_path = os.path.sep.join(
         ["face_detector", "deploy.prototxt"])
@@ -22,7 +22,7 @@ def load_face_detector_model():
 
 
 @st.cache(allow_output_mutation=True)
-# Load face mask detector model
+# load face mask detector model
 def load_mask_model():
     mask_model = load_model("mask_detector.model")
     return mask_model
@@ -32,9 +32,7 @@ model = load_mask_model()
 
     
 def detect_mask(image):
-    
     label='_'
-    #image = cv2.imdecode(np.fromstring(image.read(), np.uint8), 1)  #read the image from temporary memory
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # convert image from BGR to RGB
     orig = image.copy() # get a copy of the image
     (h, w) = image.shape[:2] # get image height and weight
@@ -57,16 +55,16 @@ def detect_mask(image):
 
             face = image[startY:endY, startX:endX]
             face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB) # extract face ROI, convert from BGR to RGB
-            face = cv2.resize(face, (224,224))         # resize to 224, 224
-            face = img_to_array(face)                      # convert resized face to an array
-            face = preprocess_input(face)               # preprocess the array
-            face = np.expand_dims(face, axis=0)            # expand array to 2D
+            face = cv2.resize(face, (224,224))           # resize to 224, 224
+            face = img_to_array(face)                    # convert resized face to an array
+            face = preprocess_input(face)                # preprocess the array
+            face = np.expand_dims(face, axis=0)          # expand array to 2D
 
             (mask, withoutMask) = model.predict(face)[0] # pass the face through the mask model, detect if there is mask or not
 
             label = "Mask on" if mask > withoutMask else "No Mask" # define label
             
-            color = (0, 255, 0) if label == "Mask on" else (0, 0, 255) # bbox is Green if 'mask' else Blue
+            color = (0, 255, 0) if label == "Mask on" else (255, 0, 0) # bbox is green if 'mask' else red
 
             label = "{}: {:.2f}%".format(label, max(mask, withoutMask) * 100) # add label probability 
 
@@ -74,19 +72,81 @@ def detect_mask(image):
                         cv2.FONT_HERSHEY_SIMPLEX, 1.20, color, 2)
             cv2.rectangle(image, (startX, startY), (endX, endY), color, 2) #display label and bbox rectangle in output frame
 
-        return image, label # return image
+        return image # return image
+    
+    
+def detect_mask_image(image):  
+    label='_'
+    image = cv2.imdecode(np.fromstring(image.read(), np.uint8), 1)  #read the image from temporary memory
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # convert image from BGR to RGB
+    orig = image.copy() # get a copy of the image
+    (h, w) = image.shape[:2] # get image height and weight
+    blob = cv2.dnn.blobFromImage(image, 1.0, (300, 300), # construct a blob from the image
+                                 (104.0, 177.0, 123.0))
+    net.setInput(blob)  # pass the blob through the detection, get region that differ in propertes, and the face region
+    detection = net.forward() 
+
+    for i in range(0, detection.shape[2]): # loop through the detection
+
+        confidence = detection[0, 0, i, 2] # extract confidence vaalue
+
+        if confidence > 0.50: # if the confidence is greater than the selected confidence from the side bar
+
+            box = detection[0, 0, i, 3:7] * np.array([w, h, w, h]) # get x and y coordinate for the bounding box
+            (startX, startY, endX, endY) = box.astype("int") 
+
+            (startX, startY) = (max(0, startX), max(0, startY))
+            (endX, endY) = (min(w-1, endX), min(h-1, endY)) # ensure bounding box does not exceed image frame
+
+            face = image[startY:endY, startX:endX]
+            face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB) # extract face ROI, convert from BGR to RGB
+            face = cv2.resize(face, (224,224))           # resize to 224, 224
+            face = img_to_array(face)                    # convert resized face to an array
+            face = preprocess_input(face)                # preprocess the array
+            face = np.expand_dims(face, axis=0)          # expand array to 2D
+
+            (mask, withoutMask) = model.predict(face)[0] # pass the face through the mask model, detect if there is mask or not
+
+            label = "Mask on" if mask > withoutMask else "No Mask" # define label
+            
+            color = (0, 255, 0) if label == "Mask on" else (255, 0, 0) # bbox is green if 'mask' else red
+
+            label = "{}: {:.2f}%".format(label, max(mask, withoutMask) * 100) # add label probability 
+
+            cv2.putText(image, label, (startX, startY - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1.20, color, 2)
+            cv2.rectangle(image, (startX, startY), (endX, endY), color, 2) #display label and bbox rectangle in output frame
+
+        return image, label # return image and label
+
     
 def run_image_detector():       
     image_file = st.file_uploader("Upload image", type=['jpeg', 'jpg', 'png']) # streamlit function to upload file
             
     if image_file is not None: 
-            st.sidebar.image(image_file, width=240) # Display uploaded image in sidebar
-            if st.button("Process"): # Button to run algorithm on input image
+            st.sidebar.image(image_file, width=240) # display uploaded image in sidebar
+            if st.button("Process"): # button to run algorithm on input image
                 image = cv2.imdecode(np.fromstring(image_file.read(), np.uint8), 1)
-                image, label = detect_mask(image) # Call mask detection model
-                st.image(image, width=420) # Display the uploaded image
-                st.success('### ' +  label) # Display label
+                image, label = detect_mask_image(image) # call mask detection model (image)
+                st.image(image, width=420) # display the uploaded image
+                st.success('### ' +  label) # display label
+                
 
+def run_video_detector():
+    run = st.checkbox('Enable webcam')
+    FRAME_WINDOW = st.image([])
+    camera = cv2.VideoCapture(0)
+
+    while run:
+        _, frame = camera.read()
+
+        img = detect_mask(frame) # Call mask detection model (video)
+
+        FRAME_WINDOW.image(img)
+
+    else:
+        st.write('Stopped')
+           
                 
 # Helper function for the main page
 def main():
@@ -97,31 +157,18 @@ def main():
     activities = ['Image Detector','Video Detector','The Team']
     choice = st.sidebar.selectbox("Choose the app mode", activities)
     
-    url = 'https://https://github.com/Henry-Lim/maskeraid'
+    url = 'https://github.com/Henry-Lim/maskeraid'
 
     if st.sidebar.button('Source code'):
         webbrowser.open_new_tab(url)
         
-    if choice == 'Image Detector': # if user chose About page, then open the about page
+    if choice == 'Image Detector': 
         st.title('maskerAID Image Detector')
         run_image_detector()
 
-    elif choice == "Video Detector": # If user chooses Home page
+    elif choice == "Video Detector": 
         st.title('maskerAID Video Detector')
-        run = st.checkbox('Enable webcam')
-        FRAME_WINDOW = st.image([])
-        camera = cv2.VideoCapture(0)
-        
-        while run:
-            _, frame = camera.read()
-            #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            
-            image = detect_mask(frame) # call mask detection model
-            
-            FRAME_WINDOW.image(image)
-            
-        else:
-            st.write('Stopped')
+        run_video_detector()
     
     elif choice == "The Team":
         st.title('The Team')
@@ -134,4 +181,3 @@ def main():
 
 if __name__ == "__main__": 
     main()
-
