@@ -1,6 +1,5 @@
 # maskerAId (Hex Cambridge 2021 Submission)
 
-# Hack Cambridge Project: Mask Detection App (MaskerAID)
 As a result of the COVID-19 global pandemic, many governments have made mask wearing mandatory to reduce the transmission of the virus. This web app aims to identify people who are not adhering to the law and gently remind them to please, **wear a mask**.
 
 
