@@ -1,6 +1,10 @@
-# maskerAId (Hex Cambridge 2021 Submission)
+# MaskerAId (Hex Cambridge 2021 Submission)
 
-As a result of the COVID-19 global pandemic, many governments have made mask wearing mandatory to reduce the transmission of the virus. This web app aims to identify people who are not adhering to the law and gently remind them to please, **wear a mask**.
+The world finds itself going through a very difficult, and in many cases, costly pandemic. While we are gradually discerning a light at the end of this long and lonely tunnel, it is more imperative than ever that everyone keeps up all the effort and personal sacrifices made in the name of the the public good. One government measure that has been adopted unilaterally across most nations of the world is the restriction to enter any indoors shop, restaurant or essential retail store without wearing a face covering.
+
+Business owners are required to check that all customers wear a face mask. Large stores are ocassionally finding it difficult to keep track of the customers entering, while all owners and employees are seldomly faced with the perhaps uncomfortable task to ask customers to apply their face covering or being forced to turn them away, in case they don't have one.
+
+MaskerAID provides a smart web app that can be used to check whether entering customers wear a face mask, either by photo or video input. More importantly, it is expected to act as self-regulatory stimulus, whereby customers who may have forgotten to wear their mask will be reminded of doing so by seeing themselves being identified as not wearing a face covering by MaskerAId.
 
 
 # Frameworks used
