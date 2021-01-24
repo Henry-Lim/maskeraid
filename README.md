@@ -12,6 +12,8 @@ As a result of the COVID-19 global pandemic, many governments have made mask wea
 # Applications
 This project can be deployed alongside embedded systems in public spaces such as restaurants, banks, airports, etc. to detect if patrons are wearing a mask. Gentle reminders will be issued if the subject is detected to be not wearing a mask.
 
+# User Interface and Examples
+![](ui.png)
 
 ![](ex_nomask.png)
 
