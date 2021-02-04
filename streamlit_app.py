@@ -6,7 +6,6 @@ import numpy as np
 import cv2
 import os
 import webbrowser
-from PIL import Image
 st.set_option('deprecation.showfileUploaderEncoding', False)
 
 
