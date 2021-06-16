@@ -28,7 +28,6 @@ def load_mask_model():
 
 net = load_face_detector_model()
 model = load_mask_model()
-
     
 def detect_mask(image):
     label='_'
